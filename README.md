@@ -51,8 +51,8 @@ npx expo start --tunnel
 | Имя | Описание | Значение по умолчанию |
 | --- | --- | --- |
 | `EXPO_PUBLIC_API_BASE_URL` | URL бэкенда (без `/api`) | `http://localhost:8000` |
-| `EXPO_PUBLIC_DEEPSEEK_API_KEY` | Ключ DeepSeek (используется приложением) | `sk-1fcbc1c97bc24fb9a17ba2b1afafa3a2` |
-| `EXPO_PUBLIC_YANDEX_GEOCODER_KEY` | Ключ Яндекс Геокодера | `fdc69334-3f89-4a96-b29a-499da1f7142a` |
+| `EXPO_PUBLIC_DEEPSEEK_API_KEY` | Ключ DeepSeek (используется приложением) | `sk-1f` |
+| `EXPO_PUBLIC_YANDEX_GEOCODER_KEY` | Ключ Яндекс Геокодера | `fdc6` |
 | `EXPO_PUBLIC_DEEPSEEK_BASE_URL` | Базовый URL DeepSeek API | `https://api.deepseek.com` |
 
 ### FastAPI (`backend/.env`)
@@ -62,9 +62,9 @@ npx expo start --tunnel
 | `SECRET_KEY` | Секрет для подписания JWT | `change-me` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Время жизни access-токена | `30` |
 | `REFRESH_TOKEN_EXPIRE_MINUTES` | Время жизни refresh-токена | `20160` |
-| `DEEPSEEK_API_KEY` | Ключ DeepSeek | `sk-1fcbc1c97bc24fb9a17ba2b1afafa3a2` |
+| `DEEPSEEK_API_KEY` | Ключ DeepSeek | `sk` |
 | `DEEPSEEK_BASE_URL` | Адрес DeepSeek | `https://api.deepseek.com` |
-| `YANDEX_API_KEY` | Ключ Яндекс.Карт (геокодер + поиск) | `fdc69334-3f89-4a96-b29a-499da1f7142a` |
+| `YANDEX_API_KEY` | Ключ Яндекс.Карт (геокодер + поиск) | `fdc6` |
 
 ## 🔌 REST API (префикс `/api`)
 | Метод | Путь | Описание |
