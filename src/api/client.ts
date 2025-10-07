@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/auth.store';
 import type { RefreshResponse } from '../types/api';
 
 const baseUrl = (process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+console.log('API Base URL:', baseUrl);
 const apiBase = `${baseUrl}/api`;
 
 const api = axios.create({

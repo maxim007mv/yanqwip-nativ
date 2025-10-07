@@ -11,14 +11,7 @@ app = FastAPI(title="Yanwqip API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1",
-        "http://127.0.0.1:3000",
-    ],
-    allow_origin_regex=r"^https?://(localhost(:\d+)?|127\.0\.0\.1(:\d+)?|.*\.exp\.direct|.*\.ngrok\.io)$",
+    allow_origins=["*"],  # Разрешить все origins для мобильного приложения
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
