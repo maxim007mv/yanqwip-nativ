@@ -109,7 +109,7 @@ async function testAPI() {
     console.log('\n5️⃣ Тест чата с агентом...');
     const chatResponse = await makeRequest(
       'POST',
-      '/agent/chat',
+      '/agent/message',
       {
         message: 'Привет! Расскажи о Москве',
       },
@@ -125,7 +125,7 @@ async function testAPI() {
     console.log('\n6️⃣ Поиск мест...');
     const placesResponse = await makeRequest(
       'GET',
-      '/places/search?q=красная+площадь',
+      '/places?q=красная+площадь',
       null,
       authHeaders,
     );
