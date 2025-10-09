@@ -53,6 +53,7 @@ export const HomeScreen: React.FC = () => {
         <Text style={styles.headline}>
           Твой персональный гид по Москве готов к новым открытиям.
         </Text>
+        <Text style={styles.registrationText}>хуй дамира</Text>
 
         <GlassCard style={styles.card}>
           <Text style={styles.cardTitle}>Быстрые действия</Text>
@@ -212,6 +213,13 @@ const styles = StyleSheet.create({
   empty: {
     color: COLORS.textSecondary,
     fontFamily: 'Inter_400Regular',
+  },
+  registrationText: {
+    color: COLORS.textSecondary,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
 

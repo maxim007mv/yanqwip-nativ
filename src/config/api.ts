@@ -1,6 +1,6 @@
 // API configuration
 const apiConfig = {
-    baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://45.144.28.25:5435',
+    baseUrl: process.env.EXPO_PUBLIC_API_BASE_URL || 'https://yanqwip.ru:8443',
     apiPrefix: '/api',
     timeout: 20000, // 20 seconds
     retries: 2,     // number of retries for failed requests
