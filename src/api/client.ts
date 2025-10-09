@@ -6,10 +6,14 @@ import { logger } from '../utils/logger';
 
 // Log the API base URL on startup
 console.log('API Base URL:', apiBaseUrl);
+console.log('API Config:', apiConfig);
 
 const api = axios.create({
   baseURL: apiBaseUrl,
   timeout: apiConfig.timeout,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 const refreshClient = axios.create({
@@ -92,8 +96,26 @@ api.interceptors.response.use(
     const duration = config ? calculateRequestDuration(config) : -1;
     logger.error(`API ERROR: ${config?.method?.toUpperCase()} ${config?.url} | ${response?.status || 'NETWORK_ERROR'}`, {
       message: error.message,
-      duration: duration >= 0 ? `${duration}ms` : 'unknown'
+      code: error.code,
+      duration: duration >= 0 ? `${duration}ms` : 'unknown',
+      stack: error.stack
     });
+
+    // Handle network errors specifically
+    if (!response && error.code) {
+      logger.error('NETWORK ERROR DETAILS:', {
+        code: error.code,
+        errno: (error as any).errno,
+        syscall: (error as any).syscall,
+        hostname: (error as any).hostname,
+        config: {
+          url: config?.url,
+          method: config?.method,
+          baseURL: config?.baseURL,
+          timeout: config?.timeout
+        }
+      });
+    }
 
     // Handle 401 unauthorized error (token expired)
     if (response?.status === 401 && !originalRequest._retry) {

@@ -123,12 +123,7 @@ async function testAPI() {
     }
 
     console.log('\n6️⃣ Поиск мест...');
-    const placesResponse = await makeRequest(
-      'GET',
-      '/places?q=красная+площадь',
-      null,
-      authHeaders,
-    );
+    const placesResponse = await makeRequest('GET', '/places?q=красная+площадь', null, authHeaders);
     if (placesResponse.status === 200) {
       console.log('✅ Поиск мест работает');
     } else {
