@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <title>Yanqwip — Места (обновлено)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+      :root{
+        --accent:#ffb84a;--accent-2:#ffc566;--accent-glow:rgba(255,184,74,.4);
+        --text-1:rgba(255,255,255,.98);--text-2:rgba(255,255,255,.8);--text-3:rgba(255,255,255,.6);
+        --glass-bg:rgba(255,255,255,.08);--glass-border:rgba(255,255,255,.22);--glass-bg-hover:rgba(255,255,255,.14);
+        --glass-shadow:0 16px 40px -8px rgba(0,0,0,.45),0 6px 12px -4px rgba(0,0,0,.3);
+        --r-card:26px;--r-btn:18px;--r-chip:14px;--page-w:480px;--hover-duration:.28s;
+      }
+      *{box-sizing:border-box}
+      html{scroll-behavior:smooth}
+      body{margin:0;background:#0d0d12;color:var(--text-1);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+        -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;}
+      /* BG */
+      .bg-container{position:fixed;inset:0;z-index:-3;overflow:hidden;
+        background:
+          radial-gradient(80% 60% at 70% 10%, rgba(255,184,74,.18) 0%, rgba(255,184,74,0) 60%),
+          radial-gradient(60% 50% at 10% 0%, rgba(255,197,102,.12) 0%, rgba(255,197,102,0) 55%),
+          linear-gradient(180deg,#1a0f0c 0%,#0c1018 100%)}
+      .bg-gradient{position:absolute;inset:-50%;filter:blur(80px) opacity(.7);
+        background:conic-gradient(from 180deg at 50% 50%,
+          rgba(255,255,255,.03) 0deg, rgba(255,255,255,0) 90deg,
+          rgba(255,255,255,.03) 180deg, rgba(255,255,255,0) 270deg,
+          rgba(255,255,255,.03) 360deg);
+        animation:spin 40s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .bg-architect{position:fixed;inset:0;z-index:-1;pointer-events:none;
+        background:
+          linear-gradient(100deg, rgba(255,255,255,.07), rgba(255,255,255,0) 35%) 0 20%/180% 200% no-repeat,
+          linear-gradient(90deg, rgba(255,255,255,.08), rgba(255,255,255,0) 40%) 100% 70%/160% 220% no-repeat;
+        filter:blur(40px) saturate(130%) opacity(.6)}
+      /* Layout */
+      .app{width:100%;max-width:var(--page-w);margin-inline:auto;padding:26px 0 140px;position:relative;z-index:1}
+      .section{padding:0 22px}
+      h2{margin:0 0 18px;font:700 28px/1 Orbitron,Inter,sans-serif;text-shadow:0 0 15px var(--accent-glow)}
+      /* Controls */
+      .search-wrap{display:flex;gap:12px;align-items:center;position:sticky;top:16px;z-index:5;padding-bottom:14px}
+      .input{flex:1;height:50px;padding:0 16px;border-radius:var(--r-btn);border:1px solid var(--glass-border);
+        background:var(--glass-bg);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);color:var(--text-1);
+        font-size:16px;outline:none;transition:box-shadow var(--hover-duration),border-color var(--hover-duration),background var(--hover-duration)}
+      .input::placeholder{color:var(--text-3)}
+      .input:focus{border-color:var(--accent);background:var(--glass-bg-hover);box-shadow:0 0 0 4px var(--accent-glow)}
+      .btn-accent{height:50px;padding:0 20px;border:none;cursor:pointer;color:#2c1e05;font-weight:700;border-radius:var(--r-btn);
+        background:linear-gradient(150deg,var(--accent),var(--accent-2));
+        box-shadow:0 12px 25px var(--accent-glow),inset 0 2px 2px rgba(255,255,255,.4);
+        transition:transform .16s ease,filter .16s ease}
+      .btn-accent:active{transform:translateY(2px) scale(.98)}
+      .filters{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 8px}
+      .filter-btn{border-radius:var(--r-chip);padding:8px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);
+        color:var(--text-2);font-size:14px;cursor:pointer;transition:all var(--hover-duration)}
+      .filter-btn:hover{background:var(--glass-bg-hover)}
+      .filter-btn.active{background:var(--accent);color:#1b1406;border-color:var(--accent)}
+      /* Cards */
+      .places-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:14px}
+      .place-card{position:relative;border-radius:var(--r-card);overflow:hidden;background:var(--glass-bg);
+        border:1px solid var(--glass-border);box-shadow:var(--glass-shadow);cursor:pointer;
+        transition:transform var(--hover-duration), box-shadow var(--hover-duration);transform:translateZ(0)}
+      .place-card:hover{transform:translateY(-6px);box-shadow:var(--glass-shadow),0 18px 42px rgba(0,0,0,.34)}
+      .place-image{height:170px;position:relative;overflow:hidden;background:#111}
+      .place-image img{width:110%;height:110%;object-fit:cover;transform:translate3d(0,0,0) scale(1.02);
+        transition:transform .8s cubic-bezier(.2,.8,.2,1);filter:saturate(1.05) contrast(1.02)}
+      .place-card:hover .place-image img{transform:translate3d(0,-2%,0) scale(1.06)}
+      .badge{position:absolute;top:12px;left:12px;background:linear-gradient(150deg,var(--accent),var(--accent-2));
+        color:#2d1f06;font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;
+        box-shadow:0 6px 16px var(--accent-glow)}
+      .fav{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;
+        background:rgba(0,0,0,.35);backdrop-filter:blur(6px);display:grid;place-items:center;border:1px solid rgba(255,255,255,.18)}
+      .fav svg{width:18px;height:18px;color:#fff;opacity:.9}
+      .place-content{padding:16px 16px 14px}
+      .place-title{margin:0 0 4px;font:700 18px/1.25 Inter,system-ui}
+      .place-desc{margin:0 0 12px;color:var(--text-2);font-size:14px;line-height:1.5}
+      .place-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-3)}
+      .place-rating{display:flex;gap:6px;align-items:center}
+      .pill{border:1px solid var(--glass-border);background:rgba(255,255,255,.06);padding:6px 10px;border-radius:999px;color:var(--text-2)}
+      .open{color:#0fd17a;background:rgba(15,209,122,.12);border-color:rgba(15,209,122,.3)}
+      /* Dock */
+      .dock{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;border-radius:26px;padding:8px 10px;
+        display:flex;gap:8px;z-index:10;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(20px)}
+      .dock .item{border-radius:16px;padding:10px 12px;color:var(--text-2);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:600;min-width:64px;transition:all var(--hover-duration)}
+      .dock .item:hover{color:var(--accent);background:var(--glass-bg-hover)}
+      .dock .item.active{color:var(--accent);background:rgba(255,184,74,.08)}
+      .dock svg{width:22px;height:22px}
+      /* Toast */
+      .toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);padding:14px 18px;border-radius:16px;color:var(--text-1);
+        background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+      .toast.show{opacity:1}
+      /* Responsive */
+      @media (min-width:768px){
+        body{padding:28px 0;display:flex;align-items:center;justify-content:center}
+        .app{border-radius:34px;overflow:hidden;border:1px solid rgba(255,255,255,.12);
+          box-shadow:0 30px 80px rgba(0,0,0,.5),0 10px 20px rgba(0,0,0,.3);max-height:calc(100vh - 56px);overflow-y:auto}
+      }
+      @media (max-width:480px){
+        :root{--page-w:100vw}
+        .places-grid{grid-template-columns:1fr}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-container"><div class="bg-gradient"></div></div>
+    <div class="bg-architect"></div>
+
+    <main class="app">
+      <section class="section">
+        <h2>Лучшие места Москвы</h2>
+
+        <div class="search-wrap">
+          <input class="input" id="search" placeholder="Ресторан, парк, музей…" />
+          <button class="btn-accent" onclick="toast('Поиск запущен…')">Искать</button>
+        </div>
+
+        <div class="filters" id="filters">
+          <button class="filter-btn active" data-cat="all">Все</button>
+          <button class="filter-btn" data-cat="cafe">Кафе</button>
+          <button class="filter-btn" data-cat="park">Парки</button>
+          <button class="filter-btn" data-cat="museum">Музеи</button>
+          <button class="filter-btn" data-cat="restaurant">Рестораны</button>
+          <button class="filter-btn" data-cat="romantic">Романтика</button>
+        </div>
+
+        <div class="places-grid" id="grid">
+          <!-- Карточки — фото только Москвы (не только Кремль) -->
+          <article class="place-card" data-category="museum" data-title="Красная площадь" data-area="Центр">
+            <div class="place-image">
+              <img alt="Красная площадь" loading="lazy"
+                src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=1600&auto=format&fit=crop"/> <!-- Красная площадь (ок) -->
+              <span class="badge">История</span>
+              <div class="fav" title="В избранное">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+              </div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Красная площадь</h3>
+              <p class="place-desc">Сердце Москвы: прогулки, вечерние огни, панорамы. Рядом ГУМ и Зарядье.</p>
+              <div class="place-meta">
+                <span class="pill">Центр · 0.5 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.8 (2.3k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="park" data-title="Парк Горького" data-area="Парк культуры">
+            <div class="place-image">
+              <img alt="Парк Горького" loading="lazy"
+                src="https://images.unsplash.com/photo-1616087411038-7b0e6a3cc1a7?q=80&w=1600&auto=format&fit=crop"/> <!-- Гойко, набережная -->
+              <span class="badge">Прогулки</span>
+              <div class="fav" title="В избранное">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+              </div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Парк Горького</h3>
+              <p class="place-desc">Зелёные аллеи, набережная, прокат велосипедов и летние террасы.</p>
+              <div class="place-meta">
+                <span class="pill">Парк культуры · 2.1 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.6 (1.8k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="cafe" data-title="Кафе Pushkin" data-area="Тверской бульвар">
+            <div class="place-image">
+              <img alt="Кафе Пушкин" loading="lazy"
+                src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop"/> <!-- Интерьер кафе -->
+              <span class="badge">Кафе</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Кафе Pushkin</h3>
+              <p class="place-desc">Классика старой Москвы: десерты, подача, атмосфера литературного салона.</p>
+              <div class="place-meta">
+                <span class="pill">Тверской бульвар · 1.3 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.7 (956)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="museum" data-title="Третьяковская галерея" data-area="Лаврушинский пер.">
+            <div class="place-image">
+              <img alt="Третьяковская галерея" loading="lazy"
+                src="https://images.unsplash.com/photo-1520697222862-2f3f1b3f1b1e?q=80&w=1600&auto=format&fit=crop"/> <!-- Музей / зал -->
+              <span class="badge">Искусство</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Третьяковская галерея</h3>
+              <p class="place-desc">Шедевры русского искусства от Репина до Врубеля. Билеты онлайн.</p>
+              <div class="place-meta">
+                <span class="pill">Лаврушинский пер. · 2.7 км</span>
+                <div class="place-rating"><span class="pill">Сегодня до 21:00</span><span>⭐ 4.9 (1.2k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="restaurant" data-title="White Rabbit" data-area="Смоленская пл.">
+            <div class="place-image">
+              <img alt="White Rabbit" loading="lazy"
+                src="https://images.unsplash.com/photo-1541542684-4a9c87e9e3e8?q=80&w=1600&auto=format&fit=crop"/> <!-- Скайлайн/панорама -->
+              <span class="badge">Вид на город</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">White Rabbit</h3>
+              <p class="place-desc">Панорамные закаты, современная русская кухня, уютные вечера над городом.</p>
+              <div class="place-meta">
+                <span class="pill">Смоленская пл. · 3.4 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.8 (742)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="romantic" data-title="Патриарший мост" data-area="Берсеневская наб.">
+            <div class="place-image">
+              <img alt="Патриарший мост" loading="lazy"
+                src="https://images.unsplash.com/photo-1609171713454-3e0c2a9729b4?q=80&w=1600&auto=format&fit=crop"/> <!-- Вид на реку/мост -->
+              <span class="badge">Романтика</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Патриарший мост</h3>
+              <p class="place-desc">Лучшее место для вечерней прогулки и кадров с подсветкой набережной.</p>
+              <div class="place-meta">
+                <span class="pill">Берсеневская наб. · 2.0 км</span>
+                <div class="place-rating"><span class="pill">Круглосуточно</span><span>⭐ 4.5 (634)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Дополнительные карточки с МОСКВА, но не Кремль: Москва-Сити, Зарядье, ВДНХ, Воробьёвы горы -->
+          <article class="place-card" data-category="park" data-title="Парк Зарядье" data-area="Китай-город">
+            <div class="place-image">
+              <img alt="Парк Зарядье" loading="lazy"
+                src="https://images.unsplash.com/photo-1603833665858-8b3a5c7d0b7f?q=80&w=1600&auto=format&fit=crop"/> <!-- Парящий мост -->
+              <span class="badge">Панорамы</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Парк «Зарядье»</h3>
+              <p class="place-desc">Парящий мост, смотровые точки и футуристические павильоны.</p>
+              <div class="place-meta">
+                <span class="pill">Китай-город · 0.9 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.7 (1.1k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="romantic" data-title="Воробьёвы горы" data-area="ЮЗАО">
+            <div class="place-image">
+              <img alt="Воробьёвы горы" loading="lazy"
+                src="https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?q=80&w=1600&auto=format&fit=crop"/> <!-- Смотровая -->
+              <span class="badge">Смотровая</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Воробьёвы горы</h3>
+              <p class="place-desc">Закаты с видом на город и стадион «Лужники» — идеально для фото.</p>
+              <div class="place-meta">
+                <span class="pill">ЮЗАО · 6.2 км</span>
+                <div class="place-rating"><span class="pill">Круглосуточно</span><span>⭐ 4.7 (2k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="museum" data-title="ВДНХ" data-area="Северо-Восток">
+            <div class="place-image">
+              <img alt="ВДНХ" loading="lazy"
+                src="https://images.unsplash.com/photo-1605280532760-44d10b191ed2?q=80&w=1600&auto=format&fit=crop"/> <!-- Фонтан Дружба народов -->
+              <span class="badge">Павильоны</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">ВДНХ</h3>
+              <p class="place-desc">Символ советского модерна: фонтаны, павильоны, выставки и каток зимой.</p>
+              <div class="place-meta">
+                <span class="pill">СВАО · 10.5 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.6 (1.6k)</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="place-card" data-category="restaurant" data-title="Москва-Сити" data-area="Пресненский">
+            <div class="place-image">
+              <img alt="Москва-Сити" loading="lazy"
+                src="https://images.unsplash.com/photo-1517524206127-48bbd363f3c7?q=80&w=1600&auto=format&fit=crop"/> <!-- Москва-Сити -->
+              <span class="badge">Скайлайн</span>
+              <div class="fav" title="В избранное"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1 7.8 7.6 7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+            </div>
+            <div class="place-content">
+              <h3 class="place-title">Москва-Сити</h3>
+              <p class="place-desc">Рестораны и барные террасы на высоте с видом на небоскрёбы.</p>
+              <div class="place-meta">
+                <span class="pill">Пресненский · 5.8 км</span>
+                <div class="place-rating"><span class="pill open">Открыто</span><span>⭐ 4.5 (1.3k)</span></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <nav class="dock">
+      <a href="index.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        Дом
+      </a>
+      <a href="agent.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Агент
+      </a>
+      <a href="places.html" class="item active">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4Z"/><path d="M8 2v16M16 6v16"/></svg>
+        Места
+      </a>
+      <a href="profile.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профиль
+      </a>
+    </nav>
+
+    <div id="toast" class="toast">Готово</div>
+
+    <script>
+      // Toast
+      let toastTimeout;
+      function toast(msg){
+        const el=document.getElementById('toast');
+        clearTimeout(toastTimeout);
+        el.textContent=msg; el.classList.add('show');
+        toastTimeout=setTimeout(()=>el.classList.remove('show'),2000);
+      }
+
+      // Фильтры + текстовый поиск
+      const search = document.getElementById('search');
+      const grid = document.getElementById('grid');
+      const cards = Array.from(grid.querySelectorAll('.place-card'));
+      const filters = document.getElementById('filters');
+      let currentCat = 'all';
+
+      function applyFilter(){
+        const q = (search.value || '').toLowerCase().trim();
+        cards.forEach(card=>{
+          const cat = card.dataset.category;
+          const title = (card.dataset.title||'').toLowerCase();
+          const area  = (card.dataset.area||'').toLowerCase();
+          const textMatch = !q || title.includes(q) || area.includes(q);
+          const catMatch  = currentCat==='all' || currentCat===cat;
+          card.style.display = (textMatch && catMatch) ? '' : 'none';
+        });
+      }
+
+      search.addEventListener('input', applyFilter);
+
+      filters.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.filter-btn');
+        if(!btn) return;
+        filters.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCat = btn.dataset.cat;
+        applyFilter();
+      });
+
+      // Параллакс при движении мыши
+      grid.addEventListener('mousemove', (e)=>{
+        const card = e.target.closest('.place-card'); if(!card) return;
+        const img = card.querySelector('.place-image img'); if(!img) return;
+        const rect = card.getBoundingClientRect();
+        const relX = (e.clientX - rect.left)/rect.width - .5;
+        const relY = (e.clientY - rect.top )/rect.height - .5;
+        img.style.transform = `translate3d(${relX*-6}px, ${relY*-6}px, 0) scale(1.06)`;
+      });
+      grid.addEventListener('mouseleave', ()=>{
+        grid.querySelectorAll('.place-image img').forEach(img=>{
+          img.style.transform = 'translate3d(0,0,0) scale(1.02)';
+        });
+      });
+
+      // Проставляем «избранное»
+      grid.addEventListener('click', (e)=>{
+        const fav = e.target.closest('.fav'); if(!fav) return;
+        fav.classList.toggle('on');
+        fav.style.background = fav.classList.contains('on') ? 'rgba(255,184,74,.22)' : 'rgba(0,0,0,.35)';
+        toast(fav.classList.contains('on') ? 'Добавлено в избранное' : 'Убрано из избранного');
+      });
+    </script>
+  </body>
+</html>

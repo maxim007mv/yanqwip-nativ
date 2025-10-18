@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Yanqwip — ИИ-агент (Ультра-дизайн)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        /* Бренд */
+        --accent:#ffb84a;
+        --accent-2:#ffc566;
+        --accent-glow:rgba(255,184,74,.45);
+
+        /* Текст */
+        --text-1:rgba(255,255,255,.98);
+        --text-2:rgba(255,255,255,.82);
+        --text-3:rgba(255,255,255,.6);
+
+        /* Стекло */
+        --glass-bg:rgba(255,255,255,.10);
+        --glass-border:rgba(255,255,255,.28);
+        --glass-bg-hover:rgba(255,255,255,.16);
+        --glass-shadow:0 18px 44px -10px rgba(0,0,0,.55), 0 8px 16px -6px rgba(0,0,0,.35);
+
+        /* Радиусы */
+        --r-card:28px;
+        --r-btn:18px;
+        --r-chip:14px;
+
+        /* Контейнер */
+        --page-w:480px;
+
+        --hover-duration:.25s;
+      }
+
+      *{ box-sizing:border-box }
+      html{ scroll-behavior:smooth }
+      html,body{ height:100% }
+      body{
+        margin:0;
+        font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        color:var(--text-1);
+        background:#0b0d12;
+        overflow-x:hidden;
+        -webkit-font-smoothing:antialiased;
+        text-rendering:optimizeLegibility;
+      }
+
+      /* ---------- ФОН ---------- */
+      .bg{ position:fixed; inset:0; z-index:-3; overflow:hidden }
+      .bg-image{
+        position:absolute; inset:-4%;
+        background:
+          url("https://images.wallpaperscraft.ru/image/single/zdaniia_gorod_vid_sverhu_201018_3840x2160.jpg")
+          center center/cover no-repeat;
+        filter:contrast(1.05) saturate(1.05) brightness(.45);
+        transform:scale(1.06);
+        transition:transform 18s linear;
+        will-change:transform;
+      }
+      .bg::after{
+        content:""; position:absolute; inset:0;
+        background:
+          radial-gradient(120% 90% at 60% 10%, rgba(255,184,74,.16) 0%, rgba(255,184,74,0) 55%),
+          radial-gradient(120% 90% at 10% 0%, rgba(255,197,102,.12) 0%, rgba(255,197,102,0) 55%),
+          linear-gradient(180deg, rgba(10,12,18,.25) 0%, rgba(10,12,18,.78) 100%);
+        pointer-events:none;
+      }
+      .bg-aurora{
+        position:absolute; inset:-40%;
+        background:conic-gradient(from 210deg at 50% 50%,
+          rgba(255,255,255,.05) 0deg,
+          rgba(255,255,255,0) 110deg,
+          rgba(255,255,255,.07) 180deg,
+          rgba(255,255,255,0) 280deg,
+          rgba(255,255,255,.05) 360deg);
+        filter:blur(90px) opacity(.7);
+        animation:spin 60s linear infinite;
+      }
+      @keyframes spin{ to{ transform:rotate(360deg) } }
+      @media (hover:hover){ body:hover .bg-image{ transform:scale(1.08) translateY(-1.2%) } }
+
+      /* ---------- APP ---------- */
+      .app{
+        width:100%; max-width:var(--page-w); margin-inline:auto;
+        padding-bottom:136px; position:relative; z-index:1;
+      }
+
+      .section{ padding:28px 22px }
+      .section h2{
+        margin:0 0 14px;
+        font-family:Orbitron, sans-serif;
+        font-size:26px; font-weight:700;
+        text-shadow:0 0 16px var(--accent-glow);
+        letter-spacing:.3px;
+      }
+
+      /* ---------- HEADER CHAT ---------- */
+      .chat-header.glass{
+        display:flex; align-items:center; gap:12px;
+        padding:14px 16px; border-radius:22px; margin-bottom:14px;
+      }
+      .agent-avatar{
+        width:38px; height:38px; border-radius:50%; position:relative; flex-shrink:0;
+        background:
+          radial-gradient(circle at 35% 35%, rgba(255,255,255,.6), rgba(255,255,255,0) 55%),
+          linear-gradient(145deg, #222c3a, #141922);
+        box-shadow:0 0 0 3px rgba(255,184,74,.18), 0 10px 24px rgba(0,0,0,.45);
+      }
+      .agent-avatar::after{
+        content:""; position:absolute; right:-2px; bottom:-2px; width:12px; height:12px; border-radius:50%;
+        background:linear-gradient(135deg,#13ef85,#0fb86a);
+        box-shadow:0 0 0 2px #0b0d12;
+      }
+      .agent-meta{ display:flex; flex-direction:column; gap:2px }
+      .agent-title{ font-weight:700; font-size:15px }
+      .agent-sub{ font-size:12px; color:var(--text-3) }
+
+      /* ---------- GLASS ---------- */
+      .glass{
+        background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        border:1px solid var(--glass-border);
+        border-radius:var(--r-card);
+        backdrop-filter:blur(26px); -webkit-backdrop-filter:blur(26px);
+        box-shadow:var(--glass-shadow);
+        position:relative; overflow:hidden;
+        transition:transform var(--hover-duration) ease, box-shadow var(--hover-duration) ease, background var(--hover-duration) ease;
+      }
+      .glass::after{ content:""; position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 1px 0 rgba(255,255,255,.14); pointer-events:none }
+
+      /* ---------- SUGGESTS ---------- */
+      .qs{ display:grid; gap:10px; grid-template-columns:1fr; margin:10px 0 18px }
+      .q{
+        padding:14px 16px; border-radius:18px; cursor:pointer; font-weight:600; color:var(--text-1);
+        border:1px solid var(--glass-border);
+        background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+        transition:transform var(--hover-duration) ease, background var(--hover-duration) ease;
+      }
+      .q:hover{ transform:translateY(-2px); background:var(--glass-bg-hover) }
+
+      /* ---------- CHAT ---------- */
+      .chat-wrap{ padding:0 }
+      .chat-messages{
+        max-height:52vh; overflow-y:auto; padding:16px; border-radius:22px; border:1px solid var(--glass-border);
+        background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+        scroll-behavior:smooth;
+      }
+      .message{ display:flex; gap:10px; margin-bottom:12px; align-items:flex-end }
+      .msg-bubble{
+        padding:12px 14px; border-radius:18px; max-width:78%;
+        line-height:1.5; font-size:15px; position:relative;
+      }
+      .bot .msg-bubble{
+        background:rgba(255,255,255,.10); color:var(--text-1);
+        border:1px solid rgba(255,255,255,.16);
+        border-bottom-left-radius:6px;
+      }
+      .user{ justify-content:flex-end }
+      .user .msg-bubble{
+        background:linear-gradient(150deg, var(--accent), var(--accent-2));
+        color:#2b1f05; font-weight:600; border-bottom-right-radius:6px;
+        box-shadow:0 10px 24px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.45);
+      }
+      .msg-time{ font-size:11px; opacity:.7; margin-top:6px }
+      .row-avatar{ width:28px; height:28px; border-radius:50%; background:#1a2230; box-shadow:0 0 0 2px rgba(255,255,255,.08) inset }
+      .bot .row-avatar{ background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.6), rgba(255,255,255,0) 60%), linear-gradient(145deg,#263244,#171d27) }
+
+      /* typing dots */
+      .typing{ display:inline-flex; gap:5px; align-items:center }
+      .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.8); opacity:.6; animation:bounce 1.2s infinite }
+      .dot:nth-child(2){ animation-delay:.15s } .dot:nth-child(3){ animation-delay:.3s }
+      @keyframes bounce{ 0%,80%,100%{ transform:translateY(0); opacity:.5 } 40%{ transform:translateY(-4px); opacity:1 } }
+
+      /* ---------- COMPOSER ---------- */
+      .composer{
+        display:flex; gap:10px; align-items:center; margin-top:12px;
+        padding:10px; border-radius:20px;
+        background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+        border:1px solid var(--glass-border);
+      }
+      .input{
+        flex:1; height:48px; border:none; outline:none; background:transparent;
+        color:var(--text-1); font-size:15px; padding:0 12px;
+      }
+      .btn{
+        height:44px; min-width:44px; border:none; border-radius:14px; cursor:pointer;
+        display:grid; place-items:center;
+        background:rgba(255,255,255,.10); color:var(--text-1);
+        transition:transform .15s ease, background var(--hover-duration) ease;
+      }
+      .btn:hover{ background:var(--glass-bg-hover); transform:translateY(-1px) }
+      .btn-accent{
+        padding:0 16px; font-weight:800; color:#2b1f05;
+        background:linear-gradient(150deg, var(--accent), var(--accent-2));
+        box-shadow:0 12px 24px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.45);
+      }
+
+      /* ---------- DOCK ---------- */
+      .dock{
+        position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+        width:calc(100% - 40px); max-width:var(--page-w);
+        padding:10px 14px; border-radius:999px; display:flex; justify-content:space-around; align-items:center; height:76px; z-index:10;
+      }
+      .dock .item{
+        display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 12px;
+        color:var(--text-2); text-decoration:none; font-size:12px; font-weight:600; border-radius:14px;
+        transition:color var(--hover-duration) ease, background var(--hover-duration) ease, transform .1s ease;
+      }
+      .dock .item svg{ width:26px; height:26px }
+      .dock .item:hover{ color:var(--accent); background:var(--glass-bg-hover) }
+      .dock .item:active{ transform:scale(.96) }
+      .dock .item.active{ color:var(--accent); text-shadow:0 0 10px var(--accent-glow) }
+
+      /* ---------- TOAST ---------- */
+      .toast{
+        position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(25px);
+        padding:14px 20px; border-radius:16px; font-weight:600; font-size:15px;
+        opacity:0; pointer-events:none; transition:all .35s cubic-bezier(.175,.885,.32,1.275); z-index:20;
+      }
+      .toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+      /* ---------- ADAPTIVE ---------- */
+      @media (min-width:768px){
+        body{ padding:30px 0; display:flex; align-items:center; justify-content:center }
+        .app{
+          border-radius:36px; overflow:hidden;
+          border:1px solid rgba(255,255,255,.12);
+          box-shadow:0 32px 90px rgba(0,0,0,.55), 0 12px 22px rgba(0,0,0,.35);
+          max-height:calc(100vh - 60px); overflow-y:auto;
+        }
+        .section{ padding:28px 26px }
+        .chat-messages{ max-height:56vh }
+        .dock{ bottom:0; border-radius:0 0 36px 36px; width:100%; margin:0; height:86px; padding-bottom:14px; transform:none; position:absolute }
+        .toast{ bottom:98px }
+      }
+      @media (max-width:480px){
+        :root{ --page-w:100vw }
+        .qs{ grid-template-columns:1fr }
+      }
+
+      /* Скрыть анимации, если пользователь просит */
+      @media (prefers-reduced-motion:reduce){
+        *{ animation:none !important; transition:none !important }
+      }
+
+      /* Тонкий скролл */
+      .chat-messages::-webkit-scrollbar{ width:10px }
+      .chat-messages::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.18); border-radius:8px }
+      .chat-messages::-webkit-scrollbar-track{ background:transparent }
+    </style>
+  </head>
+  <body>
+    <!-- Фон -->
+    <div class="bg">
+      <div class="bg-image"></div>
+      <div class="bg-aurora"></div>
+    </div>
+
+    <main class="app">
+      <section class="section">
+        <div class="chat-header glass">
+          <div class="agent-avatar" aria-hidden="true"></div>
+          <div class="agent-meta">
+            <div class="agent-title">Yanqwip — ИИ-агент</div>
+            <div class="agent-sub">Онлайн • отвечает за 1–2 с</div>
+          </div>
+          <div style="margin-left:auto; display:flex; gap:8px">
+            <button class="btn" title="Новый чат" onclick="newChat()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="btn" title="Настройки" onclick="toast('Скоро тут будут настройки')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.4 15a1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 3.4 8a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 5.84 3.3l.06.06A1.65 1.65 0 0 0 7.72 3a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09A1.65 1.65 0 0 0 14 3.4a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 8c.36.52.57 1.14.6 1.78H20a2 2 0 1 1 0 4h-.09c-.03.64-.24 1.26-.51 1.82z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-wrap">
+          <div class="chat-messages glass" id="chatMessages" aria-live="polite">
+            <div class="message bot">
+              <div class="row-avatar" aria-hidden="true"></div>
+              <div class="msg-bubble">
+                Привет! Я Yanqwip, твой персональный гид по Москве. Задай вопрос или выбери из карточек ниже.
+                <div class="msg-time">сейчас</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="qs">
+            <div class="q" onclick="sendMessage('Где провести романтический вечер?')">Где провести романтический вечер?</div>
+            <div class="q" onclick="sendMessage('Подбери маршрут для детей на выходные')">Подбери маршрут для детей на выходные</div>
+            <div class="q" onclick="sendMessage('Что посмотреть рядом с Красной площадью?')">Что посмотреть рядом с Красной площадью?</div>
+            <div class="q" onclick="sendMessage('Лучшие кафе в центре Москвы')">Лучшие кафе в центре Москвы</div>
+            <div class="q" onclick="sendMessage('Маршрут для фотосессии')">Маршрут для фотосессии</div>
+            <div class="q" onclick="sendMessage('Парки для пикника')">Парки для пикника</div>
+          </div>
+
+          <div class="composer glass">
+            <button class="btn" title="Прикрепить" onclick="toast('Загрузка медиа…')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.2a2 2 0 1 1-2.83-2.83l8.13-8.13"/></svg>
+            </button>
+            <input id="msg" class="input" placeholder="Напишите сообщение…" onkeypress="handleKeyPress(event)" />
+            <button class="btn" title="Голос" onclick="toast('Голосовой ввод…')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><rect x="7" y="4" width="10" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>
+            </button>
+            <button class="btn btn-accent" onclick="sendUserMessage()" title="Отправить">
+              Отпр.
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="dock glass" aria-label="Навигация">
+      <a href="index.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Дом
+      </a>
+      <a href="agent.html" class="item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Агент
+      </a>
+      <a href="places.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Места
+      </a>
+      <a href="profile.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профиль
+      </a>
+    </nav>
+
+    <div id="toast" class="toast glass">Готово</div>
+
+    <script>
+      // ------- Toast -------
+      let toastTimeout;
+      function toast(msg){
+        const el=document.getElementById('toast');
+        clearTimeout(toastTimeout);
+        el.textContent=msg; el.classList.add('show');
+        toastTimeout=setTimeout(()=>el.classList.remove('show'),2200);
+      }
+
+      // ------- Chat Logic -------
+      const chat = document.getElementById('chatMessages');
+
+      function addMessage(text, type){
+        const row=document.createElement('div');
+        row.className=`message ${type}`;
+        const avatar=document.createElement('div');
+        avatar.className='row-avatar';
+        const bubble=document.createElement('div');
+        bubble.className='msg-bubble';
+        bubble.innerHTML = `${text}<div class="msg-time">${new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}</div>`;
+        if(type==='user'){ row.appendChild(bubble) }
+        else { row.appendChild(avatar); row.appendChild(bubble) }
+        chat.appendChild(row);
+        chat.scrollTop=chat.scrollHeight;
+      }
+
+      function showTyping(){
+        const row=document.createElement('div');
+        row.className='message bot'; row.id='typing';
+        const avatar=document.createElement('div'); avatar.className='row-avatar';
+        const bubble=document.createElement('div'); bubble.className='msg-bubble';
+        bubble.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+        row.appendChild(avatar); row.appendChild(bubble);
+        chat.appendChild(row);
+        chat.scrollTop=chat.scrollHeight;
+      }
+      function hideTyping(){
+        document.getElementById('typing')?.remove();
+      }
+
+      function sendMessage(text){
+        const input=document.getElementById('msg');
+        input.value=text;
+        sendUserMessage();
+      }
+
+      function sendUserMessage(){
+        const input=document.getElementById('msg');
+        const message=input.value.trim();
+        if(!message) return;
+        addMessage(message,'user');
+        input.value='';
+
+        // Симулируем ответ бота с индикатором набора
+        showTyping();
+        const responses=[
+          'Отличный выбор! Я подготовлю персональный маршрут.',
+          'Это звучит интересно — сейчас подберу лучшие варианты.',
+          'Хороший запрос! Предлагаю начать с исторического центра.',
+          'Понял. Вот как можно провести время сегодня:'
+        ];
+        const delay=800+Math.random()*1200;
+        setTimeout(()=>{
+          hideTyping();
+          addMessage(responses[Math.floor(Math.random()*responses.length)], 'bot');
+        }, delay);
+      }
+
+      function handleKeyPress(e){ if(e.key==='Enter'){ sendUserMessage() } }
+      function newChat(){
+        chat.innerHTML='';
+        addMessage('Новый диалог создан. Чем помочь?','bot');
+        toast('Новый чат');
+      }
+    </script>
+  </body>
+</html>

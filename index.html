@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Yanqwip — генератор маршрутов (Ультра-дизайн)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600;700&family=Unbounded:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        /* Бренд */
+        --accent:#ffb84a;
+        --accent-2:#ffc566;
+        --accent-glow:rgba(255,184,74,.45);
+
+        /* Текст */
+        --text-1:rgba(255,255,255,.98);
+        --text-2:rgba(255,255,255,.82);
+        --text-3:rgba(255,255,255,.6);
+
+        /* Стекло */
+        --glass-bg:rgba(255,255,255,.10);
+        --glass-border:rgba(255,255,255,.28);
+        --glass-bg-hover:rgba(255,255,255,.16);
+        --glass-shadow:0 18px 44px -10px rgba(0,0,0,.55), 0 8px 16px -6px rgba(0,0,0,.35);
+
+        /* Радиусы */
+        --r-card:28px;
+        --r-btn:18px;
+        --r-chip:14px;
+
+        /* Контейнер */
+        --page-w:480px;
+
+        --hover-duration:.25s;
+      }
+
+      *{box-sizing:border-box}
+      html{scroll-behavior:smooth}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+        color:var(--text-1);
+        background:#0b0d12;
+        overflow-x:hidden;
+        -webkit-font-smoothing:antialiased;
+        text-rendering:optimizeLegibility;
+      }
+
+      /* ---------- ФОН: фото Москвы + виньетка + «аура» ---------- */
+      .bg{
+        position:fixed; inset:0; z-index:-3; overflow:hidden;
+        background:
+          radial-gradient(70% 50% at 75% 5%, rgba(255,200,140,.18) 0%, rgba(255,200,140,0) 60%),
+          radial-gradient(55% 45% at 10% 10%, rgba(255,190,120,.12) 0%, rgba(255,190,120,0) 55%),
+          linear-gradient(180deg,#1A0F0C 0%,#0B1119 100%);
+      }
+      .bg-photo{
+        position:absolute; inset:0; z-index:0;
+        background:
+          linear-gradient(0deg, rgba(0,0,0,.35), rgba(0,0,0,.35)),
+          url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgT2RXh6KBvwFzS1TfB2PLMa8xWFadjo2397E3o0A-7KQCMj8wke1QVIMAvwmipIzqRBQ&usqp=CAU") center/cover no-repeat;
+        filter:saturate(120%) brightness(1.1);
+      }
+      .bg-noise{ /* мягкая текстура */
+        position:absolute; inset:-20%;
+        background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' type='fractalNoise'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='0 0 .03 0'/></feComponentTransfer></filter><rect width='1200' height='1200' filter='url(%23n)'/></svg>");
+        opacity:.6; mix-blend-mode:soft-light;
+        animation:float 40s linear infinite;
+      }
+      .bg-glow{
+        position:absolute; inset:-40%;
+        background:conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,.06), transparent 90%, rgba(255,255,255,.06));
+        filter:blur(100px) opacity(.7);
+        animation:rotate 50s linear infinite;
+      }
+      @keyframes rotate{to{transform:rotate(360deg)}}
+      @keyframes float{50%{transform:translateY(-3%) translateX(2%)}}
+
+      /* лёгкий параллакс */
+      @media (hover:hover){
+        body:hover .bg-image{ transform:scale(1.08) translateY(-1.2%); }
+      }
+
+      /* ---------- Приложение ---------- */
+      .app{
+        width:100%; max-width:var(--page-w); margin-inline:auto;
+        padding-bottom:136px; position:relative; z-index:1;
+      }
+
+      .section{ padding:30px 22px }
+      .section h2{
+        margin:0 0 18px;
+        font-family:Orbitron, sans-serif;
+        font-size:28px; font-weight:700;
+        text-shadow:0 0 16px var(--accent-glow);
+      }
+
+      /* ---------- Хедер ---------- */
+      .hero{ padding:84px 22px 24px; position:relative }
+      .row{ display:flex; gap:12px; justify-content:flex-end }
+      .chip{
+        border-radius:var(--r-chip); padding:10px 16px;
+        color:var(--text-1); border:1px solid var(--glass-border);
+        background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        backdrop-filter:blur(26px); -webkit-backdrop-filter:blur(26px);
+        box-shadow:var(--glass-shadow);
+        display:inline-flex; align-items:center; gap:10px;
+        font-size:15px; font-weight:600; letter-spacing:.2px;
+        transition:transform var(--hover-duration) ease, box-shadow var(--hover-duration) ease, background var(--hover-duration) ease;
+      }
+      .chip:hover{ transform:translateY(-3px); background:var(--glass-bg-hover); box-shadow:var(--glass-shadow), 0 0 24px var(--accent-glow) }
+      .chip svg{ width:20px; height:20px; color:var(--text-2) }
+      .greet{ margin-top:28px }
+      .greet h1{
+        margin:0 0 8px; font-family:Unbounded, sans-serif; font-size:42px; line-height:1.15; font-weight:700;
+        text-shadow:0 0 28px var(--accent-glow);
+      }
+      .greet p{ margin:0; color:var(--text-2); font-size:17px; line-height:1.6; max-width:35ch }
+
+      /* ---------- Гласс-карты ---------- */
+      .glass{
+        background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        border:1px solid var(--glass-border);
+        border-radius:var(--r-card);
+        backdrop-filter:blur(26px); -webkit-backdrop-filter:blur(26px);
+        box-shadow:var(--glass-shadow);
+        position:relative; overflow:hidden;
+        transition:transform var(--hover-duration) ease, box-shadow var(--hover-duration) ease, background var(--hover-duration) ease;
+      }
+      .glass::after{ /* тонкий внутренний блик */
+        content:""; position:absolute; inset:0;
+        border-radius:inherit; pointer-events:none;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
+      }
+      .glass:hover{ transform:translateY(-4px); box-shadow:var(--glass-shadow), 0 0 26px var(--accent-glow) }
+
+      /* ---------- Быстрые действия ---------- */
+      .actions{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px }
+      .action-card{ padding:18px; display:flex; flex-direction:column; align-items:center; gap:14px; cursor:pointer }
+      .a-icon{
+        width:56px; height:56px; border-radius:16px;
+        background:linear-gradient(150deg, var(--accent), var(--accent-2));
+        box-shadow:0 12px 24px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.45);
+        display:grid; place-items:center;
+        transition:transform var(--hover-duration) ease, box-shadow var(--hover-duration) ease;
+      }
+      .action-card:hover .a-icon{ transform:scale(1.05); box-shadow:0 16px 28px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.55) }
+      .a-icon svg{ width:26px; height:26px; color:#2b1f05 }
+      .action-card span{ font-size:14px; text-align:center; font-weight:600; color:var(--text-1) }
+
+      /* ---------- Популярные маршруты ---------- */
+      .popular-routes{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:18px; margin-top:6px }
+      .popular-route{ display:flex; flex-direction:column; height:100%; cursor:pointer }
+      .popular-route-image{
+        height:168px; position:relative; overflow:hidden;
+        background:linear-gradient(135deg, var(--accent), var(--accent-2));
+      }
+      .popular-route-image::before{
+        content:""; position:absolute; inset:0;
+        background:linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.25)),
+          url("https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1600&auto=format&fit=crop") center/cover no-repeat;
+        filter:saturate(1.1) contrast(1.1) brightness(1.15);
+      }
+      .popular-route-badge{
+        position:absolute; top:12px; right:12px; z-index:2;
+        background:var(--accent); color:#000; font-weight:700; font-size:12px;
+        padding:5px 10px; border-radius:14px;
+      }
+      .popular-route-content{ padding:18px; display:flex; flex-direction:column; gap:10px; flex:1 }
+      .popular-route-title{ margin:0; font-size:18px; line-height:1.3; font-weight:700 }
+      .popular-route-desc{ margin:0; color:var(--text-2); font-size:14px; line-height:1.5; flex:1 }
+      .popular-route-meta{ display:flex; justify-content:space-between; align-items:center; color:var(--text-3); font-size:12px }
+      .popular-route:hover{ transform:translateY(-6px) }
+
+      /* ---------- Мои маршруты (квадраты) ---------- */
+      .routes-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px }
+      .route{
+        position:relative; aspect-ratio:1/1; padding:14px; display:flex; flex-direction:column; justify-content:space-between;
+        background:linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 55%), var(--glass-bg);
+        border-radius:var(--r-card);
+      }
+      .route:nth-child(1){ background-image:linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 55%), url("https://images.unsplash.com/photo-1502602898668-a0352efcd953?q=80&w=1600&auto=format&fit=crop"); background-size:cover; background-position:center }
+      .route:nth-child(2){ background-image:linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 55%), url("https://images.unsplash.com/photo-1490641911217-6f6a798544bc?q=80&w=1600&auto=format&fit=crop"); background-size:cover; background-position:center }
+      .route .tag{
+        align-self:flex-start; padding:7px 12px; font-size:12px; font-weight:600;
+        background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); border-radius:14px; backdrop-filter:blur(14px)
+      }
+      .route .title{ font-size:16px; font-weight:700; text-shadow:0 1px 6px rgba(0,0,0,.8) }
+
+      /* ---------- Компоненты ввода ---------- */
+      .search-wrap{ display:flex; gap:12px; align-items:center }
+      .input{
+        flex:1; height:52px; padding:0 18px; border-radius:var(--r-btn);
+        color:var(--text-1); font-size:16px; border:1px solid var(--glass-border);
+        background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+        backdrop-filter:blur(26px); outline:none;
+        transition:box-shadow var(--hover-duration) ease, border-color var(--hover-duration) ease, background var(--hover-duration) ease;
+      }
+      .input::placeholder{ color:var(--text-3) }
+      .input:focus{ border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-glow); background:var(--glass-bg-hover) }
+      .btn-accent{
+        height:52px; padding:0 24px; border:none; cursor:pointer; border-radius:var(--r-btn);
+        color:#2b1f05; font-weight:700; font-size:16px;
+        background:linear-gradient(150deg, var(--accent), var(--accent-2));
+        box-shadow:0 14px 26px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.45);
+        transition:transform .18s ease, filter .18s ease, box-shadow .18s ease; position:relative; overflow:hidden;
+      }
+      .btn-accent:hover{ filter:brightness(1.12) }
+      .btn-accent:active{ transform:translateY(1px) scale(.99) }
+
+      /* ---------- Нижний док ---------- */
+      .dock{
+        position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+        width:calc(100% - 40px); max-width:var(--page-w);
+        padding:10px 14px; border-radius:999px; display:flex; justify-content:space-around; align-items:center; height:76px; z-index:10;
+      }
+      .dock .item{
+        display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 12px;
+        color:var(--text-2); text-decoration:none; font-size:12px; font-weight:600; border-radius:14px;
+        transition:color var(--hover-duration) ease, background var(--hover-duration) ease, transform .1s ease;
+      }
+      .dock .item svg{ width:26px; height:26px }
+      .dock .item:hover{ color:var(--accent); background:var(--glass-bg-hover) }
+      .dock .item:active{ transform:scale(.96) }
+      .dock .item.active{ color:var(--accent); text-shadow:0 0 10px var(--accent-glow) }
+
+      /* ---------- Тост ---------- */
+      .toast{
+        position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(25px);
+        padding:14px 20px; border-radius:16px; font-weight:600; font-size:15px;
+        opacity:0; pointer-events:none; transition:all .35s cubic-bezier(.175,.885,.32,1.275);
+      }
+      .toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+      /* ---------- Адаптив ---------- */
+      @media (min-width:768px){
+        body{ padding:30px 0; display:flex; align-items:center; justify-content:center }
+        .app{
+          border-radius:36px; overflow:hidden;
+          border:1px solid rgba(255,255,255,.12);
+          box-shadow:0 32px 90px rgba(0,0,0,.55), 0 12px 22px rgba(0,0,0,.35);
+          max-height:calc(100vh - 60px); overflow-y:auto;
+        }
+        .section{ padding:32px 26px }
+        .hero .greet h1{ font-size:40px }
+        .routes-grid{ grid-template-columns:repeat(4,1fr) }
+        .dock{ bottom:0; border-radius:0 0 36px 36px; width:100%; margin:0; height:86px; padding-bottom:14px; transform:none; position:absolute }
+        .toast{ bottom:98px }
+      }
+      @media (max-width:480px){
+        :root{ --page-w:100vw }
+        .actions{ grid-template-columns:1fr }
+        .popular-routes{ grid-template-columns:1fr }
+        .routes-grid{ grid-template-columns:repeat(2,1fr) }
+      }
+
+      /* Уважение к пользователю: отключаем анимации, если он этого просил */
+      @media (prefers-reduced-motion:reduce){
+        *{ animation:none !important; transition:none !important }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Фон -->
+    <div class="bg">
+      <div class="bg-photo"></div>
+      <div class="bg-noise"></div>
+      <div class="bg-glow"></div>
+    </div>
+
+    <main class="app glass" style="background:linear-gradient(180deg, rgba(12,14,18,.40), rgba(12,14,18,.25));">
+      <header class="hero">
+        <div class="row">
+          <button class="chip" onclick="toast('Новый маршрут')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Маршрут
+          </button>
+          <button class="chip" onclick="toast('Фильтры открыты')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+            Фильтры
+          </button>
+        </div>
+        <div class="greet">
+          <h1>Привет! 👋</h1>
+          <p>Твой персональный гид по Москве готов к новым открытиям.</p>
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>Быстрые действия</h2>
+        <div class="actions">
+          <div class="action-card glass" onclick="toast('Генерация маршрута…')">
+            <div class="a-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </div>
+            <span>Сгенерировать<br/>маршрут</span>
+          </div>
+          <div class="action-card glass" onclick="location.href='agent.html'">
+            <div class="a-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span>Задать вопрос<br/>агенту</span>
+          </div>
+          <div class="action-card glass" onclick="location.href='places.html'">
+            <div class="a-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <span>Места<br/>поблизости</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Популярные маршруты недели</h2>
+        <div class="popular-routes">
+          <div class="popular-route glass" onclick="toast('Маршрут открыт')">
+            <div class="popular-route-image"><div class="popular-route-badge">🔥 Топ</div></div>
+            <div class="popular-route-content">
+              <h3 class="popular-route-title">Романтический вечер в центре</h3>
+              <p class="popular-route-desc">Прогулка по Арбату, ужин и закат на набережной.</p>
+              <div class="popular-route-meta"><span>3 ч · 5 мест</span><span>⭐ 4.9 (124)</span></div>
+            </div>
+          </div>
+
+          <div class="popular-route glass" onclick="toast('Маршрут открыт')">
+            <div class="popular-route-image" style="--img:url('https://images.unsplash.com/photo-1537202108838-e7072bad1927?q=80&w=1600&auto=format&fit=crop')"><div class="popular-route-badge">Новинка</div></div>
+            <div class="popular-route-content">
+              <h3 class="popular-route-title">Кофейный тур по Москве</h3>
+              <p class="popular-route-desc">Лучшие кофейни — от классики до авторских.</p>
+              <div class="popular-route-meta"><span>4 ч · 6 мест</span><span>⭐ 4.7 (89)</span></div>
+            </div>
+          </div>
+
+          <div class="popular-route glass" onclick="toast('Маршрут открыт')">
+            <div class="popular-route-image" style="--img:url('https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1600&auto=format&fit=crop')"><div class="popular-route-badge">Семейный</div></div>
+            <div class="popular-route-content">
+              <h3 class="popular-route-title">Выходные с детьми</h3>
+              <p class="popular-route-desc">Парки, музеи и безопасные активности.</p>
+              <div class="popular-route-meta"><span>5 ч · 4 места</span><span>⭐ 4.8 (156)</span></div>
+            </div>
+          </div>
+
+          <div class="popular-route glass" onclick="toast('Маршрут открыт')">
+            <div class="popular-route-image" style="--img:url('https://images.unsplash.com/photo-1535398089889-dd807df1dfc3?q=80&w=1600&auto=format&fit=crop')"><div class="popular-route-badge">История</div></div>
+            <div class="popular-route-content">
+              <h3 class="popular-route-title">По следам истории</h3>
+              <p class="popular-route-desc">От Кремля до авангарда.</p>
+              <div class="popular-route-meta"><span>6 ч · 7 мест</span><span>⭐ 4.6 (78)</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Мои маршруты</h2>
+        <div id="routes" class="routes-grid">
+          <div class="route glass"><div class="tag">Романтика</div><div class="title">Огни вечерней Москвы</div></div>
+          <div class="route glass"><div class="tag">Кафе</div><div class="title">Кофейный заплыв по центру</div></div>
+          <div class="route glass"><div class="tag">Музеи</div><div class="title">Искусство в сердце города</div></div>
+          <div class="route glass"><div class="tag">Парки</div><div class="title">Зелёный отдых</div></div>
+          <div class="route glass"><div class="tag">История</div><div class="title">По следам прошлого</div></div>
+          <div class="route glass"><div class="tag">Фотосессия</div><div class="title">Лучшие виды Москвы</div></div>
+        </div>
+        <div class="center" style="margin-top:18px">
+          <button class="btn-accent" onclick="addRoute()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Новый маршрут
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="dock glass">
+      <a href="#" class="item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Дом
+      </a>
+      <a href="agent.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Агент
+      </a>
+      <a href="places.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Карта
+      </a>
+      <a href="profile.html" class="item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Профиль
+      </a>
+    </nav>
+
+    <div id="toast" class="toast glass">Сообщение</div>
+
+    <script>
+      // Toast
+      let toastTimeout;
+      function toast(msg){
+        const el=document.getElementById('toast');
+        clearTimeout(toastTimeout);
+        el.textContent=msg; el.classList.add('show');
+        toastTimeout=setTimeout(()=>el.classList.remove('show'),2300);
+      }
+
+      // Добавление маршрута
+      function addRoute(){
+        const grid=document.getElementById('routes');
+        const div=document.createElement('div');
+        div.className='route glass';
+        const seed=Math.floor(Math.random()*1000);
+        div.style.backgroundImage=
+          `linear-gradient(0deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,0) 55%), url('https://source.unsplash.com/random/600x600/?moscow,city,night,${seed}')`;
+        div.style.backgroundSize='cover';
+        div.style.backgroundPosition='center';
+        div.innerHTML=`<div class="tag">Новое</div><div class="title">Маршрут #${grid.children.length+1}</div>`;
+        grid.prepend(div);
+        toast('Новый маршрут добавлен!');
+      }
+    </script>
+  </body>
+</html>

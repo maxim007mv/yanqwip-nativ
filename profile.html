@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Yanqwip — Профиль (Glass Premium)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --accent:#FFB84A; --accent-2:#FFC566; --accent-glow:rgba(255,184,74,.45);
+      --text-1:rgba(255,255,255,.98); --text-2:rgba(255,255,255,.82); --text-3:rgba(255,255,255,.62);
+      --glass:rgba(255,255,255,.10); --glass-b:rgba(255,255,255,.28); --glass-hover:rgba(255,255,255,.16);
+      --shadow:0 18px 48px rgba(0,0,0,.45), 0 6px 16px rgba(0,0,0,.28);
+      --r-xl:30px; --r-lg:22px; --r-md:16px; --r-sm:12px;
+      --page-w:460px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text-1); background:#0c1016; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      overflow-x:hidden;
+    }
+
+    /* ===== BACKGROUND: Moscow photo + darkening + warm lights ===== */
+    .bg{
+      position:fixed; inset:0; z-index:-3; overflow:hidden;
+      background:
+        radial-gradient(70% 50% at 75% 5%, rgba(255,200,140,.18) 0%, rgba(255,200,140,0) 60%),
+        radial-gradient(55% 45% at 10% 10%, rgba(255,190,120,.12) 0%, rgba(255,190,120,0) 55%),
+        linear-gradient(180deg,#1A0F0C 0%,#0B1119 100%);
+    }
+    .bg-photo{
+      position:absolute; inset:0; z-index:0;
+      background:
+        linear-gradient(0deg, rgba(0,0,0,.58), rgba(0,0,0,.58)),
+        url("https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=2060&auto=format&fit=crop") center/cover no-repeat;
+      filter:saturate(110%);
+    }
+    .bg-noise{ /* мягкая текстура */
+      position:absolute; inset:-20%;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' type='fractalNoise'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='0 0 .03 0'/></feComponentTransfer></filter><rect width='1200' height='1200' filter='url(%23n)'/></svg>");
+      opacity:.6; mix-blend-mode:soft-light;
+      animation:float 40s linear infinite;
+    }
+    .bg-glow{
+      position:absolute; inset:-40%;
+      background:conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,.06), transparent 90%, rgba(255,255,255,.06));
+      filter:blur(100px) opacity(.7);
+      animation:rotate 50s linear infinite;
+    }
+    @keyframes rotate{to{transform:rotate(360deg)}}
+    @keyframes float{50%{transform:translateY(-3%) translateX(2%)}}
+
+    /* ===== PRIMITIVES ===== */
+    .app{max-width:var(--page-w); margin:0 auto; padding:20px 0 120px; position:relative; z-index:1}
+    .glass{
+      background:var(--glass); border:1px solid var(--glass-b); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+      border-radius:var(--r-lg); box-shadow:var(--shadow); position:relative; overflow:hidden;
+      transition:background .25s ease, transform .2s ease, box-shadow .25s ease;
+    }
+    .glass:hover{background:var(--glass-hover); transform:translateY(-2px); box-shadow:var(--shadow), 0 0 26px var(--accent-glow)}
+    .section{padding:22px 20px}
+    .h2{
+      margin:0 0 16px; font-family:"Orbitron",sans-serif; font-weight:700; font-size:26px;
+      text-shadow:0 0 14px var(--accent-glow);
+    }
+    .btn-accent{
+      display:inline-flex; align-items:center; gap:10px; padding:14px 22px; border-radius:var(--r-md);
+      background:linear-gradient(150deg,var(--accent),var(--accent-2)); color:#251705; font-weight:700; border:none; cursor:pointer;
+      box-shadow:0 12px 28px var(--accent-glow), inset 0 1px 1px rgba(255,255,255,.5);
+      transition:transform .15s ease, filter .15s ease;
+    }
+    .btn-accent:active{transform:translateY(1px)}
+    .chip{padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.10); color:var(--text-1); font-weight:500}
+
+    /* ===== TOP BAR ===== */
+    .topbar{
+      margin:18px 20px 0; padding:10px 12px; display:flex; align-items:center; justify-content:space-between;
+      border-radius:var(--r-lg);
+    }
+    .topbar .title{display:flex; align-items:center; gap:10px; font-weight:600}
+    .icon-btn{
+      width:42px;height:42px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--glass-b);
+      background:rgba(255,255,255,.10); cursor:pointer; transition:transform .15s ease, background .2s ease;
+    }
+    .icon-btn:active{transform:scale(.98)}
+    .icon{width:22px;height:22px;stroke:currentColor;color:var(--text-2)}
+
+    /* ===== COVER / PROFILE HEADER ===== */
+    .cover{
+      margin:18px 20px 0; border-radius:var(--r-xl); overflow:hidden; position:relative;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.65)),
+        url("https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2080&auto=format&fit=crop") center/cover no-repeat;
+      height:180px; box-shadow:var(--shadow);
+    }
+    .cover .badge{
+      position:absolute; top:14px; left:14px; display:flex; gap:8px;
+    }
+    .avatar-wrap{
+      position:absolute; left:24px; bottom:-42px; display:flex; align-items:flex-end; gap:14px;
+    }
+    .avatar{
+      width:96px; height:96px; border-radius:50%; display:grid; place-items:center; font-size:40px; font-weight:800; color:#1f1406;
+      background:linear-gradient(160deg,var(--accent),var(--accent-2)); box-shadow:0 16px 40px var(--accent-glow), inset 0 2px 2px rgba(255,255,255,.5);
+      border:3px solid rgba(255,255,255,.35);
+    }
+    .name{
+      margin:0; font-size:28px; font-weight:700; text-shadow:0 8px 24px rgba(0,0,0,.45);
+    }
+    .sub{color:var(--text-2); margin-top:4px}
+
+    /* ===== CONTENT CARDS ===== */
+    .profile-grid{padding:58px 20px 0; display:grid; gap:18px}
+    .card{padding:18px}
+    .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+    .stat{
+      padding:14px; border-radius:18px; text-align:center; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22);
+    }
+    .stat b{display:block; font-size:20px}
+    .stat span{font-size:12px; color:var(--text-2)}
+
+    .donut-wrap{display:flex; align-items:center; gap:16px}
+    .donut-legend{display:grid; gap:6px}
+    .legend-row{display:flex; gap:8px; align-items:center; color:var(--text-2); font-size:13px}
+    .dot{width:10px;height:10px;border-radius:50%}
+
+    .achv-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+    .achv{padding:14px; border-radius:16px; text-align:center}
+    .achv h5{margin:6px 0 0; font-size:13px}
+
+    /* ===== SETTINGS LIST ===== */
+    .list{display:grid; gap:10px}
+    .row{
+      display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-radius:16px;
+      border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08);
+    }
+    .row-left{display:flex; gap:12px; align-items:center}
+    .switch{position:relative; width:48px; height:28px; border-radius:999px; background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.28)}
+    .switch::after{
+      content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:white; transition:left .2s ease, background .2s ease
+    }
+    .switch.on{background:linear-gradient(150deg,var(--accent),var(--accent-2))}
+    .switch.on::after{left:23px; background:#1f1406}
+
+    /* ===== DOCK ===== */
+    .dock{
+      position:fixed; left:50%; transform:translateX(-50%); bottom:20px; width:calc(100% - 40px); max-width:var(--page-w);
+      display:flex; justify-content:space-around; align-items:center; height:76px; padding:0 14px; border-radius:999px; z-index:10;
+    }
+    .dock a{display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 12px; border-radius:14px; color:var(--text-2); text-decoration:none; font-size:12px; font-weight:600}
+    .dock a.active{color:var(--accent); text-shadow:0 0 10px var(--accent-glow)}
+    .dock svg{width:24px; height:24px}
+
+    .toast{
+      position:fixed; left:50%; bottom:110px; transform:translateX(-50%) translateY(24px);
+      opacity:0; pointer-events:none; transition:all .32s cubic-bezier(.2,.9,.25,1);
+      padding:12px 16px; border-radius:14px; font-weight:600; font-size:14px;
+    }
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+    @media(min-width:768px){
+      body{display:flex; align-items:center; justify-content:center; padding:28px 0}
+      .app{border-radius:36px; overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:0 30px 80px rgba(0,0,0,.5), 0 10px 20px rgba(0,0,0,.3)}
+      .dock{bottom:0; border-radius:0 0 36px 36px; width:100%; transform:none; left:auto}
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg">
+    <div class="bg-photo"></div>
+    <div class="bg-noise"></div>
+    <div class="bg-glow"></div>
+  </div>
+
+  <main class="app">
+    <!-- Topbar -->
+    <div class="topbar glass">
+      <div class="title">
+        <span class="chip">Премиум</span>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="icon-btn" onclick="toast('Поиск скоро')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" onclick="toast('Настройки профиля')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.49a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.44 2.9l.06.06A1.65 1.65 0 0 0 9.32 3.3H9.4A1.65 1.65 0 0 0 11 1.8V1a2 2 0 1 1 4 0v.49a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9.4a1.65 1.65 0 0 0 1.51 1H23a2 2 0 1 1 0 4h-.49a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cover -->
+    <section class="cover">
+      <div class="badge">
+        <span class="chip">Москва</span>
+        <span class="chip">Гид</span>
+      </div>
+      <div class="avatar-wrap">
+        <div class="avatar">М</div>
+        <div>
+          <h1 class="name">Максим</h1>
+          <div class="sub">С нами с 09 октября 2025 · Любит архитектуру и кофейни</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Content -->
+    <div class="profile-grid">
+      <!-- stats + donut -->
+      <div class="glass card">
+        <h2 class="h2">Статистика маршрутов</h2>
+        <div style="display:grid; gap:18px">
+          <div class="stats">
+            <div class="stat"><b>12</b><span>Создано</span></div>
+            <div class="stat"><b>45</b><span>Лайкнуто</span></div>
+            <div class="stat"><b>156</b><span>Просмотрено</span></div>
+            <div class="stat"><b>8.5</b><span>Средний рейтинг</span></div>
+          </div>
+          <div class="donut-wrap">
+            <svg id="donut" width="120" height="120" viewBox="0 0 120 120"></svg>
+            <div class="donut-legend">
+              <div class="legend-row"><span class="dot" style="background:var(--accent)"></span> Активность за месяц</div>
+              <div class="legend-row"><span class="dot" style="background:rgba(255,255,255,.28)"></span> Осталось до цели</div>
+              <div style="margin-top:6px">
+                <button class="btn-accent" onclick="toast('История маршрутов открыта')">История маршрутов</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="glass card">
+        <h2 class="h2">Достижения</h2>
+        <div class="achv-grid">
+          <div class="achv glass">
+            🏙️
+            <h5>Ночной фланёр</h5>
+            <div class="sub">5 вечерних маршрутов</div>
+          </div>
+          <div class="achv glass">
+            ☕
+            <h5>Кофеман</h5>
+            <div class="sub">10 кофейн в подборках</div>
+          </div>
+          <div class="achv glass">
+            🖼️
+            <h5>Эстет</h5>
+            <div class="sub">Музеи и выставки</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Route History -->
+      <div class="glass card">
+        <h2 class="h2">История маршрутов</h2>
+        <div style="display:grid; gap:12px">
+          <div class="row" style="padding:12px 16px; border-radius:12px; background:rgba(255,255,255,.05)">
+            <div class="row-left">
+              <span style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:grid; place-items:center; font-size:16px">🏙️</span>
+              <div>
+                <div style="font-weight:600">Романтический вечер в центре</div>
+                <div class="sub">Сегодня, 3 места · ⭐ 4.9</div>
+              </div>
+            </div>
+            <span class="chip" style="font-size:11px">Создан</span>
+          </div>
+          <div class="row" style="padding:12px 16px; border-radius:12px; background:rgba(255,255,255,.05)">
+            <div class="row-left">
+              <span style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:grid; place-items:center; font-size:16px">☕</span>
+              <div>
+                <div style="font-weight:600">Кофейный тур по Москве</div>
+                <div class="sub">Вчера, 6 мест · ❤️ Лайкнуто</div>
+              </div>
+            </div>
+            <span class="chip" style="font-size:11px">Лайк</span>
+          </div>
+          <div class="row" style="padding:12px 16px; border-radius:12px; background:rgba(255,255,255,.05)">
+            <div class="row-left">
+              <span style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:grid; place-items:center; font-size:16px">🖼️</span>
+              <div>
+                <div style="font-weight:600">По следам истории</div>
+                <div class="sub">3 дня назад, 7 мест · 👁️ Просмотрено</div>
+              </div>
+            </div>
+            <span class="chip" style="font-size:11px">Просмотр</span>
+          </div>
+        </div>
+        <div style="margin-top:16px; text-align:center">
+          <button class="btn-accent" onclick="toast('Показать все маршруты')">Показать все</button>
+        </div>
+      </div>
+
+      <!-- Edit form -->
+      <div class="glass card">
+        <h2 class="h2">Редактировать профиль</h2>
+        <div style="display:grid; gap:14px">
+          <label>Имя
+            <input class="glass" style="width:100%; padding:14px 16px; border-radius:14px; outline:none" value="Максим"/>
+          </label>
+          <label>E-mail
+            <input class="glass" style="width:100%; padding:14px 16px; border-radius:14px; outline:none" placeholder="lomakin2334@yandex.ru"/>
+          </label>
+          <label>О себе
+            <textarea class="glass" rows="4" style="width:100%; padding:14px 16px; border-radius:14px; outline:none" placeholder="Коротко о ваших предпочтениях..."></textarea>
+          </label>
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <span class="chip">Кафе</span>
+            <span class="chip">Парки</span>
+            <span class="chip">Музеи</span>
+            <span class="chip">Романтика</span>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px">
+            <button class="btn-accent" onclick="toast('Сохранено')">Сохранить</button>
+            <button class="btn-accent" style="background:linear-gradient(150deg,#fff,#ddd)" onclick="toast('Фото обновлено')">Обновить фото</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="glass card">
+        <h2 class="h2">Настройки</h2>
+        <div class="list">
+          <div class="row">
+            <div class="row-left">
+              <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M3 5h18M3 12h18M3 19h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <div>
+                <div>Уведомления</div>
+                <div class="sub">Рекомендации и обновления маршрутов</div>
+              </div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <div>
+                <div>Темная тема</div>
+                <div class="sub">Стекло + тёплый градиент</div>
+              </div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="row">
+            <div class="row-left">
+              <svg class="icon" viewBox="0 0 24 24" fill="none"><path d="M12 21s-8-6-8-11a8 8 0 0 1 16 0c0 5-8 11-8 11Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
+              <div>
+                <div>Геолокация</div>
+                <div class="sub">Использовать GPS для «поблизости»</div>
+              </div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div style="margin-top:14px">
+          <button class="btn-accent" onclick="toast('Вы успешно вышли')">Выйти из аккаунта</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Dock -->
+  <nav class="dock glass">
+    <a href="index.html" class="active">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" stroke="currentColor" stroke-width="2"/><path d="M9 22V12h6v10" stroke="currentColor" stroke-width="2"/></svg>
+      Дом
+    </a>
+    <a href="agent.html">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" stroke="currentColor" stroke-width="2"/></svg>
+      Агент
+    </a>
+    <a href="places.html">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-8-6-8-11a8 8 0 0 1 16 0c0 5-8 11-8 11Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/></svg>
+      Места
+    </a>
+    <a href="profile.html" class="active">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M6 21v-2a6 6 0 0 1 12 0v2" stroke="currentColor" stroke-width="2"/></svg>
+      Профиль
+    </a>
+  </nav>
+
+  <div id="toast" class="toast glass"></div>
+
+  <script>
+    // Donut chart (monthly activity)
+    (() => {
+      const svg = document.getElementById('donut');
+      if(!svg) return;
+      const size=120, r=46, sw=12, cx=size/2, cy=size/2, c=2*Math.PI*r, pct=65;
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${get('--accent')}" />
+            <stop offset="100%" stop-color="${get('--accent-2')}" />
+          </linearGradient>
+        </defs>
+        <circle cx="${cx}" cy="${cy}" r="${r}" stroke="rgba(255,255,255,.18)" stroke-width="${sw}" fill="none"/>
+        <circle id="arc" cx="${cx}" cy="${cy}" r="${r}" stroke="url(#g)" stroke-width="${sw}" stroke-linecap="round" fill="none"
+          transform="rotate(-90 ${cx} ${cy})" stroke-dasharray="${c}" stroke-dashoffset="${c}"/>
+        <text x="${cx}" y="${cy+6}" text-anchor="middle" font-family="Orbitron, Inter, sans-serif" font-size="20" font-weight="700" fill="white">${pct}%</text>
+      `;
+      requestAnimationFrame(()=>{
+        const arc=document.getElementById('arc'); const to=c*(1-pct/100);
+        arc.animate([{strokeDashoffset:c},{strokeDashoffset:to}],{duration:1200,fill:'forwards',easing:'cubic-bezier(.2,.9,.25,1)'});
+      });
+      function get(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+    })();
+
+    // Toast helper
+    let t; function toast(msg){
+      const el=document.getElementById('toast');
+      clearTimeout(t); el.textContent=msg; el.classList.add('show');
+      t=setTimeout(()=>el.classList.remove('show'),2200);
+    }
+  </script>
+</body>
+</html>
