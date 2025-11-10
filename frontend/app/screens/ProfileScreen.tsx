@@ -1,3 +1,4 @@
+// Profile Card Component - Улучшенная версия
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -15,7 +16,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, Feather } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 
 import { GlassCard } from '@/components/GlassCard';
 import { Button } from '@/components/Button';
@@ -26,10 +26,10 @@ import { Colors, Typography, Spacing, BorderRadius, Layout } from '@/lib/theme';
 const { width } = Dimensions.get('window');
 
 const STATS = [
-  { label: 'Маршрутов', value: 12, icon: 'map', color: '#FF6B9D' },
-  { label: 'Мест', value: 38, icon: 'location', color: '#4ECDC4' },
-  { label: 'Дней', value: 45, icon: 'calendar', color: '#FFB84A' },
-  { label: 'Км', value: 156, icon: 'walk', color: '#A78BFA' },
+  { label: 'Маршрутов', value: 12, icon: 'map', color: '#FF6B9D', gradient: ['#FF6B9D', '#FE8B99'] },
+  { label: 'Мест', value: 38, icon: 'location', color: '#4ECDC4', gradient: ['#4ECDC4', '#44A9A9'] },
+  { label: 'Дней', value: 45, icon: 'calendar', color: '#FFB84A', gradient: ['#FFB84A', '#FFC566'] },
+  { label: 'Км', value: 156, icon: 'walk', color: '#A78BFA', gradient: ['#A78BFA', '#8B5CF6'] },
 ];
 
 const ACHIEVEMENTS = [
@@ -40,52 +40,16 @@ const ACHIEVEMENTS = [
 ];
 
 const QUICK_SETTINGS = [
-  {
-    id: 'theme',
-    label: 'Тёмная тема',
-    icon: 'moon',
-    iconLight: 'sunny',
-    type: 'switch',
-  },
-  {
-    id: 'notifications',
-    label: 'Уведомления',
-    icon: 'notifications',
-    type: 'switch',
-  },
-  {
-    id: 'location',
-    label: 'Геолокация',
-    icon: 'location',
-    type: 'switch',
-  },
+  { id: 'theme', label: 'Тёмная тема', icon: 'moon', iconLight: 'sunny', type: 'switch' },
+  { id: 'notifications', label: 'Уведомления', icon: 'notifications', type: 'switch' },
+  { id: 'location', label: 'Геолокация', icon: 'location', type: 'switch' },
 ] as const;
 
 const MENU_ITEMS = [
-  {
-    id: 'favorites',
-    label: 'Избранное',
-    icon: 'heart',
-    badge: '12',
-  },
-  {
-    id: 'history',
-    label: 'История',
-    icon: 'time',
-    badge: null,
-  },
-  {
-    id: 'settings',
-    label: 'Настройки',
-    icon: 'settings',
-    badge: null,
-  },
-  {
-    id: 'help',
-    label: 'Помощь',
-    icon: 'help-circle',
-    badge: null,
-  },
+  { id: 'favorites', label: 'Избранное', icon: 'heart', badge: '12' },
+  { id: 'history', label: 'История', icon: 'time', badge: null },
+  { id: 'settings', label: 'Настройки', icon: 'settings', badge: null },
+  { id: 'help', label: 'Помощь', icon: 'help-circle', badge: null },
 ] as const;
 
 export default function ProfileScreen() {
@@ -104,19 +68,9 @@ export default function ProfileScreen() {
   const handleSaveProfile = () => {
     updateUser({ name: editName });
     setIsEditing(false);
-    
-    // Micro-interaction animation
     Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 1.05,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
+      Animated.timing(scaleAnim, { toValue: 1.05, duration: 100, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start();
   };
 
@@ -140,195 +94,261 @@ export default function ProfileScreen() {
           bounces={true}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Header */}
+          {/* Header Actions */}
           <View style={styles.header}>
             <TouchableOpacity
               activeOpacity={0.85}
-              style={[
-                styles.headerButton,
-                { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
-              ]}
+              style={[styles.headerButton, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}
             >
               <Ionicons name="share-outline" size={20} color={colors.text1} />
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.85}
-              style={[
-                styles.headerButton,
-                { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
-              ]}
+              style={[styles.headerButton, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}
             >
               <Ionicons name="qr-code-outline" size={20} color={colors.text1} />
             </TouchableOpacity>
           </View>
 
-          {/* Profile Card */}
-          <GlassCard style={styles.profileCard} borderRadius="xxl">
-            <LinearGradient
-              colors={
-                isDark
-                  ? ['rgba(255,184,74,0.15)', 'transparent']
-                  : ['rgba(255,184,74,0.25)', 'transparent']
-              }
-              style={styles.profileCardGradient}
-            />
-            
-            <View style={styles.profileHeader}>
-              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-                <LinearGradient
-                  colors={[colors.accent, colors.accent2]}
-                  style={styles.avatar}
-                >
-                  <Text style={styles.avatarText}>
-                    {user?.name?.[0]?.toUpperCase() || 'М'}
-                  </Text>
-                  <View style={styles.avatarBadge}>
-                    <Ionicons name="checkmark" size={14} color="#2B1F05" />
-                  </View>
-                </LinearGradient>
-              </Animated.View>
+          {/* УЛУЧШЕННАЯ ПРОФИЛЬНАЯ КАРТОЧКА */}
+          <GlassCard style={styles.profileCard} borderRadius="ultra">
+            {/* Верхний декоративный градиент */}
+            <View style={styles.profileCardHeader}>
+              <LinearGradient
+                colors={isDark 
+                  ? ['rgba(255,184,74,0.2)', 'rgba(255,184,74,0.05)', 'transparent']
+                  : ['rgba(255,184,74,0.3)', 'rgba(255,184,74,0.1)', 'transparent']
+                }
+                style={styles.headerGradient}
+              />
+            </View>
 
-              <View style={styles.profileInfo}>
-                {isEditing ? (
-                  <View style={styles.editContainer}>
-                    <TextInput
-                      style={[
-                        styles.nameInput,
-                        {
-                          color: colors.text1,
-                          backgroundColor: colors.glassBg,
-                          borderColor: colors.accent,
-                        },
-                      ]}
-                      value={editName}
-                      onChangeText={setEditName}
-                      placeholder="Введите имя"
-                      placeholderTextColor={colors.text3}
-                      autoFocus
+            {/* Основной контент профиля */}
+            <View style={styles.profileContent}>
+              {/* Аватар и основная информация */}
+              <View style={styles.profileMain}>
+                {/* Центрированный аватар */}
+                <Animated.View style={[styles.avatarWrapper, { transform: [{ scale: scaleAnim }] }]}>
+                  <LinearGradient
+                    colors={[colors.accent, colors.accent2]}
+                    style={styles.avatar}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Text style={styles.avatarText}>
+                      {user?.name?.[0]?.toUpperCase() || 'М'}
+                    </Text>
+                  </LinearGradient>
+                  {/* Verified Badge */}
+                  <View style={styles.verifiedBadge}>
+                    <LinearGradient
+                      colors={['#13EF85', '#0ACB6F']}
+                      style={StyleSheet.absoluteFill}
                     />
-                    <View style={styles.editActions}>
-                      <TouchableOpacity
-                        onPress={handleSaveProfile}
-                        style={[styles.editButton, { backgroundColor: colors.accent }]}
-                      >
-                        <Ionicons name="checkmark" size={18} color="#2B1F05" />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={handleCancelEdit}
+                    <Ionicons name="checkmark" size={16} color="#FFF" />
+                  </View>
+                </Animated.View>
+
+                {/* Имя и редактирование */}
+                <View style={styles.nameSection}>
+                  {isEditing ? (
+                    <View style={styles.editContainer}>
+                      <TextInput
                         style={[
-                          styles.editButton,
-                          { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
+                          styles.nameInput,
+                          {
+                            color: colors.text1,
+                            backgroundColor: colors.glassBg,
+                            borderColor: colors.accent,
+                          },
+                        ]}
+                        value={editName}
+                        onChangeText={setEditName}
+                        placeholder="Введите имя"
+                        placeholderTextColor={colors.text3}
+                        autoFocus
+                      />
+                      <View style={styles.editActions}>
+                        <TouchableOpacity
+                          onPress={handleSaveProfile}
+                          style={[styles.editBtn, { backgroundColor: colors.accent }]}
+                        >
+                          <Ionicons name="checkmark" size={18} color="#2B1F05" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={handleCancelEdit}
+                          style={[styles.editBtn, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}
+                        >
+                          <Ionicons name="close" size={18} color={colors.text2} />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ) : (
+                    <>
+                      <View style={styles.nameRow}>
+                        <Text
+                          style={[
+                            styles.userName,
+                            { color: colors.text1, fontFamily: Typography.unbounded },
+                          ]}
+                        >
+                          {user?.name || 'Максим'}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setIsEditing(true)}
+                          style={[styles.editIcon, { backgroundColor: colors.glassBg, borderColor: colors.glassBorder }]}
+                        >
+                          <Feather name="edit-2" size={14} color={colors.text2} />
+                        </TouchableOpacity>
+                      </View>
+                      <Text
+                        style={[
+                          styles.userRole,
+                          { color: colors.text2, fontFamily: Typography.interMedium },
                         ]}
                       >
-                        <Ionicons name="close" size={18} color={colors.text2} />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ) : (
-                  <View style={styles.nameRow}>
-                    <Text
-                      style={[
-                        styles.name,
-                        { color: colors.text1, fontFamily: Typography.unbounded },
-                      ]}
-                    >
-                      {user?.name || 'Максим'}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => setIsEditing(true)}
-                      style={[
-                        styles.iconButton,
-                        { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
-                      ]}
-                    >
-                      <Feather name="edit-2" size={14} color={colors.text2} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-                
-                <View style={styles.badges}>
+                        {isGuest ? 'Гостевой режим' : 'Путешественник'}
+                      </Text>
+                    </>
+                  )}
+                </View>
+
+                {/* Бейджи */}
+                <View style={styles.badgesRow}>
                   <View
                     style={[
-                      styles.badge,
+                      styles.locationBadge,
                       { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
                     ]}
                   >
-                    <Ionicons name="location" size={12} color={colors.accent} />
-                    <Text
-                      style={[
-                        styles.badgeText,
-                        { color: colors.text2, fontFamily: Typography.interMedium },
-                      ]}
-                    >
+                    <Ionicons name="location" size={14} color={colors.accent} />
+                    <Text style={[styles.badgeText, { color: colors.text2, fontFamily: Typography.interMedium }]}>
                       Москва
                     </Text>
                   </View>
                   {!isGuest && (
                     <View
                       style={[
-                        styles.badge,
-                        { backgroundColor: colors.accent + '20', borderColor: colors.accent },
+                        styles.premiumBadge,
+                        { 
+                          backgroundColor: colors.accent + '20',
+                          borderColor: colors.accent,
+                        },
                       ]}
                     >
-                      <Ionicons name="sparkles" size={12} color={colors.accent} />
-                      <Text
-                        style={[
-                          styles.badgeText,
-                          { color: colors.accent, fontFamily: Typography.interSemiBold },
-                        ]}
-                      >
+                      <Ionicons name="sparkles" size={14} color={colors.accent} />
+                      <Text style={[styles.badgeText, { color: colors.accent, fontFamily: Typography.interSemiBold }]}>
                         Премиум
                       </Text>
                     </View>
                   )}
                 </View>
               </View>
-            </View>
 
-            {/* Stats Grid - Bento Grid Style */}
-            <View style={styles.statsGrid}>
-              {STATS.map((stat, index) => (
-                <View
-                  key={stat.label}
+              {/* Разделитель */}
+              <View style={[styles.divider, { backgroundColor: colors.glassBorder }]} />
+
+              {/* Статистика в Grid Layout */}
+              <View style={styles.statsSection}>
+                <Text
                   style={[
-                    styles.statCard,
-                    {
-                      backgroundColor: colors.glassBg,
-                      borderColor: colors.glassBorder,
-                    },
-                    index === 0 && styles.statCardLarge,
+                    styles.statsSectionTitle,
+                    { color: colors.text1, fontFamily: Typography.unbounded },
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.statIcon,
-                      { backgroundColor: stat.color + '15' },
-                    ]}
-                  >
-                    <Ionicons name={stat.icon as any} size={20} color={stat.color} />
+                  Статистика
+                </Text>
+                <View style={styles.statsGrid}>
+                  {/* Левая колонка */}
+                  <View style={styles.statsColumn}>
+                    {STATS.slice(0, 2).map((stat) => (
+                      <View
+                        key={stat.label}
+                        style={[
+                          styles.statCard,
+                          {
+                            backgroundColor: colors.glassBg,
+                            borderColor: colors.glassBorder,
+                          },
+                        ]}
+                      >
+                        <LinearGradient
+                          colors={stat.gradient}
+                          style={styles.statIconBox}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                        >
+                          <Ionicons name={stat.icon as any} size={22} color="#FFF" />
+                        </LinearGradient>
+                        <View style={styles.statInfo}>
+                          <Text
+                            style={[
+                              styles.statValue,
+                              { color: colors.text1, fontFamily: Typography.interBold },
+                            ]}
+                          >
+                            {stat.value}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.statLabel,
+                              { color: colors.text2, fontFamily: Typography.interMedium },
+                            ]}
+                          >
+                            {stat.label}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
                   </View>
-                  <Text
-                    style={[
-                      styles.statValue,
-                      { color: colors.text1, fontFamily: Typography.interBold },
-                    ]}
-                  >
-                    {stat.value}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.statLabel,
-                      { color: colors.text2, fontFamily: Typography.interMedium },
-                    ]}
-                  >
-                    {stat.label}
-                  </Text>
+                  {/* Правая колонка */}
+                  <View style={styles.statsColumn}>
+                    {STATS.slice(2, 4).map((stat) => (
+                      <View
+                        key={stat.label}
+                        style={[
+                          styles.statCard,
+                          {
+                            backgroundColor: colors.glassBg,
+                            borderColor: colors.glassBorder,
+                          },
+                        ]}
+                      >
+                        <LinearGradient
+                          colors={stat.gradient}
+                          style={styles.statIconBox}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                        >
+                          <Ionicons name={stat.icon as any} size={22} color="#FFF" />
+                        </LinearGradient>
+                        <View style={styles.statInfo}>
+                          <Text
+                            style={[
+                              styles.statValue,
+                              { color: colors.text1, fontFamily: Typography.interBold },
+                            ]}
+                          >
+                            {stat.value}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.statLabel,
+                              { color: colors.text2, fontFamily: Typography.interMedium },
+                            ]}
+                          >
+                            {stat.label}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              ))}
+              </View>
             </View>
           </GlassCard>
 
-          {/* Achievements */}
+          {/* Достижения */}
           <View style={styles.section}>
             <Text
               style={[
@@ -350,9 +370,7 @@ export default function ProfileScreen() {
                     styles.achievementCard,
                     {
                       backgroundColor: colors.glassBg,
-                      borderColor: achievement.unlocked
-                        ? colors.accent
-                        : colors.glassBorder,
+                      borderColor: achievement.unlocked ? colors.accent : colors.glassBorder,
                       opacity: achievement.unlocked ? 1 : 0.5,
                     },
                   ]}
@@ -376,7 +394,7 @@ export default function ProfileScreen() {
             </ScrollView>
           </View>
 
-          {/* Quick Settings */}
+          {/* Быстрые настройки */}
           <GlassCard style={styles.settingsCard} borderRadius="xxl">
             <Text
               style={[
@@ -409,25 +427,15 @@ export default function ProfileScreen() {
                     key={setting.id}
                     style={[
                       styles.settingRow,
-                      {
-                        backgroundColor: colors.glassBg,
-                        borderColor: colors.glassBorder,
-                      },
+                      { backgroundColor: colors.glassBg, borderColor: colors.glassBorder },
                     ]}
                   >
                     <View style={styles.settingLeft}>
-                      <View
-                        style={[
-                          styles.settingIconBox,
-                          { backgroundColor: colors.accent + '15' },
-                        ]}
-                      >
+                      <View style={[styles.settingIconBox, { backgroundColor: colors.accent + '15' }]}>
                         <Ionicons
                           name={
                             (setting.id === 'theme'
-                              ? isDark
-                                ? setting.icon
-                                : setting.iconLight
+                              ? isDark ? setting.icon : setting.iconLight
                               : setting.icon) as any
                           }
                           size={18}
@@ -446,10 +454,7 @@ export default function ProfileScreen() {
                     <Switch
                       value={switchValue}
                       onValueChange={onToggle}
-                      trackColor={{
-                        false: colors.glassBg,
-                        true: colors.accent,
-                      }}
+                      trackColor={{ false: colors.glassBg, true: colors.accent }}
                       thumbColor="#FFF"
                       ios_backgroundColor={colors.glassBg}
                     />
@@ -459,7 +464,7 @@ export default function ProfileScreen() {
             </View>
           </GlassCard>
 
-          {/* Menu Items */}
+          {/* Меню */}
           <GlassCard style={styles.menuCard} borderRadius="xxl">
             {MENU_ITEMS.map((item, index) => (
               <TouchableOpacity
@@ -474,12 +479,7 @@ export default function ProfileScreen() {
                 ]}
               >
                 <View style={styles.menuLeft}>
-                  <View
-                    style={[
-                      styles.menuIconBox,
-                      { backgroundColor: colors.glassBg },
-                    ]}
-                  >
+                  <View style={[styles.menuIconBox, { backgroundColor: colors.glassBg }]}>
                     <Ionicons name={item.icon as any} size={20} color={colors.text1} />
                   </View>
                   <Text
@@ -494,12 +494,7 @@ export default function ProfileScreen() {
                 <View style={styles.menuRight}>
                   {item.badge && (
                     <View style={[styles.menuBadge, { backgroundColor: colors.accent }]}>
-                      <Text
-                        style={[
-                          styles.menuBadgeText,
-                          { fontFamily: Typography.interBold },
-                        ]}
-                      >
+                      <Text style={[styles.menuBadgeText, { fontFamily: Typography.interBold }]}>
                         {item.badge}
                       </Text>
                     </View>
@@ -510,7 +505,7 @@ export default function ProfileScreen() {
             ))}
           </GlassCard>
 
-          {/* Logout Button */}
+          {/* Кнопка выхода */}
           <Button
             title={isGuest ? 'Войти' : 'Выйти'}
             variant="outline"
@@ -555,7 +550,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.screenGutter,
     paddingTop: Spacing.md,
     paddingBottom: Layout.dockOffset + 140,
-    gap: Spacing.lg,
+    gap: Spacing.xl,
   },
 
   // Header
@@ -563,7 +558,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: Spacing.sm,
-    marginBottom: Spacing.md,
   },
   headerButton: {
     width: 40,
@@ -574,64 +568,86 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Profile Card
+  // УЛУЧШЕННАЯ ПРОФИЛЬНАЯ КАРТОЧКА
   profileCard: {
-    padding: Spacing.xl,
-    gap: Spacing.xl,
     overflow: 'hidden',
+    padding: 0,
   },
-  profileCardGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.lg,
-  },
-  avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: BorderRadius.round,
-    justifyContent: 'center',
-    alignItems: 'center',
+  profileCardHeader: {
+    height: 100,
     position: 'relative',
   },
+  headerGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  profileContent: {
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.xl,
+  },
+  
+  // Основная секция профиля
+  profileMain: {
+    alignItems: 'center',
+    gap: Spacing.lg,
+    marginTop: -50, // Поднимаем аватар
+  },
+  avatarWrapper: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
   avatarText: {
-    fontSize: 32,
+    fontSize: 36,
     color: '#2B1F05',
     fontFamily: Typography.interExtraBold,
   },
-  avatarBadge: {
+  verifiedBadge: {
     position: 'absolute',
-    bottom: 2,
-    right: 2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#13EF85',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#FFF',
+    overflow: 'hidden',
   },
-  profileInfo: {
-    flex: 1,
-    gap: Spacing.sm,
+
+  // Секция имени
+  nameSection: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+    width: '100%',
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  name: {
-    fontSize: Typography.h3,
-    letterSpacing: 0.2,
+  userName: {
+    fontSize: Typography.h2,
+    letterSpacing: 0.3,
   },
-  iconButton: {
+  userRole: {
+    fontSize: Typography.body,
+    opacity: 0.8,
+  },
+  editIcon: {
     width: 28,
     height: 28,
     borderRadius: BorderRadius.sm,
@@ -640,79 +656,121 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   editContainer: {
-    gap: Spacing.sm,
+    width: '100%',
+    gap: Spacing.md,
+    alignItems: 'center',
   },
   nameInput: {
-    fontSize: Typography.h4,
+    fontSize: Typography.h3,
     fontFamily: Typography.interSemiBold,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
     borderWidth: 2,
+    textAlign: 'center',
+    minWidth: '80%',
   },
   editActions: {
     flexDirection: 'row',
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
-  editButton: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.md,
+  editBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
   },
-  badges: {
+
+  // Бейджи
+  badgesRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
     flexWrap: 'wrap',
+    justifyContent: 'center',
   },
-  badge: {
+  locationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.sm,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
+  },
+  premiumBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
   },
   badgeText: {
     fontSize: Typography.small,
   },
 
-  // Stats Grid - Bento Grid Style
+  // Разделитель
+  divider: {
+    height: 1,
+    width: '100%',
+    opacity: 0.3,
+  },
+
+  // Секция статистики
+  statsSection: {
+    gap: Spacing.lg,
+  },
+  statsSectionTitle: {
+    fontSize: Typography.h4,
+    textAlign: 'center',
+  },
   statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    gap: Spacing.lg,
+    justifyContent: 'space-between',
+  },
+  statsColumn: {
+    flex: 1,
     gap: Spacing.md,
   },
   statCard: {
-    flex: 1,
-    minWidth: (width - Layout.screenGutter * 2 - Spacing.xl * 2 - Spacing.md) / 2,
-    padding: Spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    gap: Spacing.sm,
+    flex: 1,
   },
-  statCardLarge: {
-    minWidth: '100%',
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.md,
+  statIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statInfo: {
+    gap: 2,
+    flex: 1,
   },
   statValue: {
-    fontSize: Typography.h2,
-    lineHeight: Typography.h2 * 1.1,
+    fontSize: Typography.h3,
+    lineHeight: Typography.h3 * 1.1,
   },
   statLabel: {
     fontSize: Typography.caption,
   },
 
-  // Achievements
+  // Достижения
   section: {
     gap: Spacing.md,
   },
@@ -753,7 +811,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Settings Card
+  // Настройки
   settingsCard: {
     padding: Spacing.xl,
     gap: Spacing.lg,
@@ -785,15 +843,16 @@ const styles = StyleSheet.create({
     fontSize: Typography.body,
   },
 
-  // Menu Card
+  // Меню
   menuCard: {
-    overflow: 'hidden',
+    padding: Spacing.md,
   },
   menuItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: Spacing.lg,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
   },
   menuLeft: {
     flexDirection: 'row',
@@ -813,28 +872,25 @@ const styles = StyleSheet.create({
   menuRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
   menuBadge: {
-    minWidth: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
   },
   menuBadgeText: {
-    fontSize: Typography.tiny,
+    fontSize: Typography.small,
     color: '#2B1F05',
   },
 
-  // Logout
+  // Кнопки
   logoutButton: {
-    marginTop: Spacing.sm,
+    marginTop: Spacing.md,
   },
   version: {
     fontSize: Typography.small,
     textAlign: 'center',
-    marginTop: Spacing.md,
+    marginTop: Spacing.xl,
   },
 });
